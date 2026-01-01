@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+env/
+build/
+dist/
+
+# Configuración y Secretos
+.env
+auth.json
+*.log
+
+# Base de datos local
+*.sqlite3
+data/
+
+# IDEs
+.vscode/
+.idea/
