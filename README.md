@@ -16,9 +16,10 @@ Este proyecto nace como un desafío personal de desarrollo constante, con el obj
 - Base de Datos: SQLite (para persistencia de vulnerabilidades).
 
 ## 📅 Bitácora de Desarrollo (Enero 2026)
-| Día | Hito | Descripción |
-| :--- | :--- | :--- |
-| 01 | Init | Creación del repositorio y estructura base del proyecto. |
+| Día de Trabajo | Fecha | Hito | Descripción |
+| :--- | :--- | :--- | :--- |
+| 01 | 01 Ene | Inicio & Estructura | Repositorio, .gitignore y arquitectura modular. |
+| 02 | 02 Ene | Configuración | Carga de .env y validación de seguridad de llaves. |
 
 ---
 Desarrollado por [Esteban Tamayo - Makenion] - Ingeniero en Informática.
