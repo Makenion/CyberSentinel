@@ -6,53 +6,57 @@ import time
 
 
 def run_sentinel():
-    print("🚀 Iniciando CyberSentinel - Día 4: Modo Filtrado Inteligente")
+    print("🚀 CyberSentinel v1.5 - Modo: Escaneo de Stack Técnico")
 
+    # Carga de configuración
     config = get_config()
     if not config:
-        print("❌ Error crítico: No se pudo cargar la configuración.")
         return
 
-    # Cargar historial de vulnerabilidades ya notificadas
-    processed_ids = get_processed_cves()
+    keywords = config.get("KEYWORDS", [])
+    min_score = config.get("MIN_SCORE", 7.0)
 
-    # Solicitar las últimas vulnerabilidades
-    vulnerabilidades = fetch_latest_cves(limit=20)
+    # Historial y obtención de datos
+    processed_ids = get_processed_cves()
+    vulnerabilidades = fetch_latest_cves(limit=25)
 
     if not vulnerabilidades:
-        print("⚠️ No se recibieron datos de la API de NIST o la lista está vacía.")
+        print("⚠️ No hay datos nuevos para procesar.")
         return
 
-    nuevas_alertas = 0
-    print(f"🔍 Analizando {len(vulnerabilidades)} vulnerabilidades recientes...")
+    alertas_enviadas = 0
+    print(f"🔍 Analizando {len(vulnerabilidades)} vulnerabilidades contra el stack: {keywords}")
 
     for v in vulnerabilidades:
         cve_id = v['cve']['id']
+        description = v['cve'].get('descriptions', [{}])[0].get('value', "").lower()
 
-        # Extracción segura del puntaje CVSS
         metrics = v['cve'].get('metrics', {}).get('cvssMetricV31', [{}])[0]
         base_score = metrics.get('cvssData', {}).get('baseScore', 0.0)
 
-        # LÓGICA DE FILTRADO
-        if cve_id not in processed_ids and base_score >= config["MIN_SCORE"]:
-                print(f"🔥 AMENAZA DETECTADA: {cve_id} (Puntaje: {base_score})")
+        is_local_tech = any(word.strip().lower() in description for word in keywords if word.strip())
 
-                # Enviar a Discord
-                success = send_cve_alert(config["DISCORD_WEBHOOK"], v, base_score)
+        if cve_id not in processed_ids:
+            if is_local_tech or base_score >= min_score:
+
+                prioridad_msg = "🎯 [TECH LOCAL]" if is_local_tech else "🔥 [CRÍTICO]"
+                print(f"{prioridad_msg} {cve_id} (Score: {base_score})")
+
+                success = send_cve_alert(
+                    config["DISCORD_WEBHOOK"],
+                    v,
+                    base_score,
+                    is_priority=is_local_tech
+                )
 
                 if success:
-                    # Guardamos en el historial solo si se envió con éxito
                     save_processed_cve(cve_id)
-                    nuevas_alertas += 1
+                    alertas_enviadas += 1
                     time.sleep(1)
-                else:
-                    save_processed_cve(cve_id)
-                    print(f"ℹ️ {cve_id} ignorado por bajo impacto (Score: {base_score})")
+            else:
+                save_processed_cve(cve_id)
 
-        if nuevas_alertas == 0:
-            print("✅ Escaneo finalizado. Sin nuevas amenazas críticas detectadas.")
-        else:
-            print(f"🏁 Ciclo completado. {nuevas_alertas} alertas críticas enviadas a Discord.")
+    print(f"🏁 Escaneo terminado. Alertas enviadas hoy: {alertas_enviadas}")
 
 
 if __name__ == "__main__":
