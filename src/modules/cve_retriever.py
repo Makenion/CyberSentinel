@@ -1,20 +1,24 @@
 import requests
 from src.utils.config_loader import get_config
+from datetime import datetime, timedelta
 
-
-def fetch_latest_cves(limit=5):
+def fetch_latest_cves(limit=20):
     config = get_config()
-    if not config:
-        return []
+    if not config: return []
+
+    past_date = (datetime.utcnow() - timedelta(days=30)).strftime('%Y-%m-%dT%H:%M:%S.000')
 
     url = "https://services.nvd.nist.gov/rest/json/cves/2.0"
+    headers = {"apiKey": config["NVD_API_KEY"]}
 
-    headers = {
-        "apiKey": config["NVD_API_KEY"]
-    }
+    now = datetime.utcnow()
+    pub_end = now.strftime('%Y-%m-%dT%H:%M:%S.000')
 
     params = {
-        "resultsPerPage": limit
+        "resultsPerPage": limit,
+        "startIndex": 0,
+        "pubStartDate": past_date,
+        "pubEndDate": pub_end
     }
 
     try:
