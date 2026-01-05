@@ -16,10 +16,11 @@ Este proyecto nace como un desafío personal de desarrollo constante, con el obj
 - Base de Datos: SQLite (para persistencia de vulnerabilidades).
 
 ## 📅 Bitácora de Desarrollo (Enero 2026)
-| Día de Trabajo | Fecha  | Hito | Descripción |
-|:---------------|:-------| :--- | :--- |
-| 01             | 01 Ene | Inicio & Estructura | Repositorio, .gitignore y arquitectura modular. |
-| 02             | 02 Ene | Configuración | Carga de .env y validación de seguridad de llaves. |
+| Día de Trabajo | Fecha  | Hito | Descripción                                                                        |
+|:---------------|:-------| :--- |:-----------------------------------------------------------------------------------|
+| 01             | 01 Ene | Inicio & Estructura | Repositorio, .gitignore y arquitectura modular.                                    |
+| 02             | 02 Ene | Configuración | Carga de .env y validación de seguridad de llaves.                                 |
 | 03             | 03 Ene | Alertas & Persistencia | Creación del notificador de Discord y gestión de historial para evitar duplicados. |
+| 04             | 04 Ene | Triaje & Filtrado | Implementación de filtros CVSS, colores dinámicos y optimización de datos.         |
 ---
 Desarrollado por [Esteban Tamayo - Makenion] - Ingeniero en Informática.
