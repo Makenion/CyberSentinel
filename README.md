@@ -22,5 +22,6 @@ Este proyecto nace como un desafío personal de desarrollo constante, con el obj
 | 02             | 02 Ene | Configuración | Carga de .env y validación de seguridad de llaves.                                 |
 | 03             | 03 Ene | Alertas & Persistencia | Creación del notificador de Discord y gestión de historial para evitar duplicados. |
 | 04             | 04 Ene | Triaje & Filtrado | Implementación de filtros CVSS, colores dinámicos y optimización de datos.         |
+| 05             | 05 Ene | Prioridad Local | Monitoreo específico de stack tecnológico (Windows/AMD/Python).                                                                                   |
 ---
 Desarrollado por [Esteban Tamayo - Makenion] - Ingeniero en Informática.
