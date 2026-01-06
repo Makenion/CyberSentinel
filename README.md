@@ -16,12 +16,13 @@ Este proyecto nace como un desafío personal de desarrollo constante, con el obj
 - Base de Datos: SQLite (para persistencia de vulnerabilidades).
 
 ## 📅 Bitácora de Desarrollo (Enero 2026)
-| Día de Trabajo | Fecha  | Hito | Descripción                                                                        |
-|:---------------|:-------| :--- |:-----------------------------------------------------------------------------------|
-| 01             | 01 Ene | Inicio & Estructura | Repositorio, .gitignore y arquitectura modular.                                    |
-| 02             | 02 Ene | Configuración | Carga de .env y validación de seguridad de llaves.                                 |
-| 03             | 03 Ene | Alertas & Persistencia | Creación del notificador de Discord y gestión de historial para evitar duplicados. |
-| 04             | 04 Ene | Triaje & Filtrado | Implementación de filtros CVSS, colores dinámicos y optimización de datos.         |
-| 05             | 05 Ene | Prioridad Local | Monitoreo específico de stack tecnológico (Windows/AMD/Python).                                                                                   |
+| Día de Trabajo | Fecha  | Hito                   | Descripción                                                                                                                                                                                                                           |
+|:---------------|:-------|:-----------------------|:--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| 01             | 01 Ene | Inicio & Estructura    | Repositorio, .gitignore y arquitectura modular.                                                                                                                                                                                       |
+| 02             | 02 Ene | Configuración          | Carga de .env y validación de seguridad de llaves.                                                                                                                                                                                    |
+| 03             | 03 Ene | Alertas & Persistencia | Creación del notificador de Discord y gestión de historial para evitar duplicados.                                                                                                                                                    |
+| 04             | 04 Ene | Triaje & Filtrado      | Implementación de filtros CVSS, colores dinámicos y optimización de datos.                                                                                                                                                            |
+| 05             | 05 Ene | Prioridad Local        | Monitoreo específico de stack tecnológico (Windows/AMD/Python).                                                                                                                                                                       |
+| 06             | 06 Ene | Automatización & Logs  | Implementación de ciclo de ejecución infinita (Daemon) y sistema de logs profesional.                                                                                                                                                 |
 ---
 Desarrollado por [Esteban Tamayo - Makenion] - Ingeniero en Informática.
