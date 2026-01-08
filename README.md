@@ -30,6 +30,7 @@ El sistema está completamente contenedorizado. Para ejecutar:
 | 05             | 05 Ene | Prioridad Local        | Monitoreo específico de stack tecnológico (Windows/AMD/Python).                                                                                                                                                                                                                          |
 | 06             | 06 Ene | Automatización & Logs  | Implementación de ciclo de ejecución infinita (Daemon) y sistema de logs profesional.                                                                                                                                                                                                    |
 | 07             | 07 Ene | Dockerización          | Despliegue profesional mediante contenedores Docker.                                                                                                                                                                                                                                    |
+| 08             | 08 Ene | Healthcheck & Status   | Notificaciones diarias de salud del sistema y monitoreo de estado en Docker.                                                                                                                                                                                                                                                                                        |
 ---
 
 Desarrollado por [Esteban Tamayo - Makenion] - Ingeniero en Informática.
