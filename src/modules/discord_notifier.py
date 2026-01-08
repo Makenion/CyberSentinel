@@ -11,9 +11,7 @@ def get_severity_color(score, is_priority):
         return 15105570  # Naranja (Alto)
     elif score >= 4.0:
         return 15844367  # Amarillo (Medio)
-
     return 3066993  # Verde (Bajo)
-
 
 def send_cve_alert(webhook_url, cve_data, score, is_priority=False):
     cve_id = cve_data['cve']['id']
@@ -55,9 +53,27 @@ def send_cve_alert(webhook_url, cve_data, score, is_priority=False):
         }]
     }
 
+def send_health_status(webhook_url, stats):
+    payload = {
+        "embeds": [{
+            "title": "💚 CyberSentinel: Reporte de Salud Diario",
+            "color": 3066993,  # Verde éxito
+            "fields": [
+                {"name": "Estado del Servicio", "value": "✅ Operativo", "inline": True},
+                {"name": "CVEs Históricos", "value": f"📦 {stats['total_processed']}", "inline": True},
+                {"name": "Último Escaneo", "value": f"🕒 {stats['last_run']}", "inline": False}
+            ],
+            "footer": {"text": "Sistema de monitoreo activo desatendido"}
+        }]
+    }
+
     try:
         response = requests.post(webhook_url, json=payload)
-        return response.status_code == 204
+        if response.status_code == 204:
+            return True
+        else:
+            print(f"⚠️ Discord respondió con código: {response.status_code}")
+            return False
     except Exception as e:
-        print(f"❌ Error al enviar a Discord: {e}")
+        print(f"❌ Error al enviar healthcheck: {e}")
         return False
