@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  cybersentinel:
+    build: .
+    container_name: cybersentinel_prod
+    restart: always  # Solo si pc falla o se reinicia
+    env_file:
+      - .env
+    volumes:
+      - ./data:/app/data  # Persistencia de historial
+      - ./logs:/app/logs  # Persistencia de auditoría
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10mb"
+        max-file: "3"
