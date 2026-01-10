@@ -3,7 +3,7 @@ from datetime import datetime
 from src.utils.config_loader import get_config
 from src.modules.cve_retriever import fetch_latest_cves
 from src.modules.discord_notifier import send_cve_alert, send_health_status
-from src.utils.history_manager import get_processed_cves, save_processed_cve
+from src.utils.database_manager import init_db, is_cve_processed, save_detection
 from src.utils.logger import setup_logger
 
 logger = setup_logger()
@@ -23,72 +23,103 @@ def check_cpe_match(cve_item, target_cpes):
 def run_sentinel():
     config = get_config()
     if not config:
+        logger.error("❌ No se pudo cargar la configuración.")
         return
 
-    # Carga listas de interés
+    # Cargamos activos de interés desde el .env
     target_cpes = config.get("CPE_LIST", [])
     keywords = config.get("KEYWORDS", [])
-    processed_ids = get_processed_cves()
+    min_score = config.get("MIN_SCORE", 7.0)
 
-    logger.info("📡 Escaneando nuevas vulnerabilidades en NIST...")
+    logger.info("📡 Escaneando NIST NVD para nuevas amenazas...")
     vulnerabilidades = fetch_latest_cves(limit=30)
 
     if not vulnerabilidades:
+        logger.warning("⚠️ No se obtuvieron vulnerabilidades en este ciclo.")
         return
+
+    alertas_enviadas = 0
 
     for v in vulnerabilidades:
         cve_id = v['cve']['id']
 
-        if cve_id not in processed_ids:
-            # FILTRADO QUIRÚRGICO
-            is_exact_match = check_cpe_match(v, target_cpes)
+        #  VERIFICACIÓN EN BASE DE DATOS
+        if not is_cve_processed(cve_id):
 
-            # FILTRADO POR PALABRAS CLAVE
+            #  ANÁLISIS DE IMPACTO (CPE y Keywords)
+            is_exact_match = check_cpe_match(v, target_cpes)
             description = v['cve'].get('descriptions', [{}])[0].get('value', "").lower()
             is_keyword_match = any(word.strip().lower() in description for word in keywords if word.strip())
 
-            # EVALUACIÓN DE PUNTAJE
+            #  EXTRACCIÓN DE PUNTAJE CVSS
             metrics = v['cve'].get('metrics', {}).get('cvssMetricV31', [{}])[0]
             base_score = metrics.get('cvssData', {}).get('baseScore', 0.0)
+            vuln_status = v['cve'].get('vulnStatus', 'N/A')
 
-            # LÓGICA DE ALERTA
-            if is_exact_match or is_keyword_match or base_score >= config.get("MIN_SCORE", 7.0):
-                prioridad = is_exact_match or is_keyword_match
+            # Define si es prioridad
+            es_prioridad = is_exact_match or is_keyword_match
 
-                logger.info(f"🔥 Coincidencia encontrada: {cve_id} (Exacta: {is_exact_match})")
+            #  LÓGICA DE TRIAGE
+            if es_prioridad or base_score >= min_score:
+                logger.info(f"🎯 Coincidencia detectada: {cve_id} (Score: {base_score})")
 
-                send_cve_alert(
+                # Enviar a Discord
+                success = send_cve_alert(
                     config["DISCORD_WEBHOOK"],
                     v,
                     base_score,
-                    is_priority=prioridad
+                    is_priority=es_prioridad
                 )
-                save_processed_cve(cve_id)
+
+                if success:
+                    # Guardar en SQLite
+                    save_detection(
+                        cve_id=cve_id,
+                        description=description[:250],
+                        score=base_score,
+                        severity=vuln_status,
+                        is_priority=es_prioridad
+                    )
+                    alertas_enviadas += 1
+                    time.sleep(1)
             else:
-                save_processed_cve(cve_id)
+                save_detection(cve_id, "Filtrado: Bajo impacto", base_score, "IGNORED", False)
+
+    logger.info(f"🏁 Ciclo terminado. Alertas procesadas: {alertas_enviadas}")
 
 
 if __name__ == "__main__":
-    logger.info("🛡️ CyberSentinel v1.8 - Modo Precisión CPE Activado")
+    init_db()
+
+    logger.info("🛡️ CyberSentinel v2.0 (SQL Engine) iniciado.")
     last_health_check = None
 
     while True:
         try:
-            # Healthcheck Diario
             current_date = datetime.now().date()
             if last_health_check != current_date:
                 config = get_config()
-                stats = {
-                    "total_processed": len(get_processed_cves()),
-                    "last_run": datetime.now().strftime("%H:%M:%S")
-                }
-                send_health_status(config["DISCORD_WEBHOOK"], stats)
-                last_health_check = current_date
+                if config:
+                    from src.utils.database_manager import DB_PATH
+                    import sqlite3
+
+                    conn = sqlite3.connect(DB_PATH)
+                    total_cves = conn.execute('SELECT COUNT(*) FROM detections').fetchone()[0]
+                    conn.close()
+
+                    stats = {
+                        "total_processed": total_cves,
+                        "last_run": datetime.now().strftime("%H:%M:%S")
+                    }
+                    send_health_status(config["DISCORD_WEBHOOK"], stats)
+                    last_health_check = current_date
+                    logger.info("💚 Healthcheck diario enviado exitosamente.")
 
             run_sentinel()
-            logger.info("😴 Ciclo completado. Esperando 60 minutos...")
+
+            logger.info("😴 Durmiendo 60 minutos hasta el próximo escaneo...")
             time.sleep(3600)
 
         except Exception as e:
-            logger.error(f"❌ Error en el ciclo principal: {e}")
+            logger.error(f"❌ Error crítico en el ciclo principal: {e}")
             time.sleep(60)
