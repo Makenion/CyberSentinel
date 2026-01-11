@@ -5,6 +5,7 @@ from src.modules.cve_retriever import fetch_latest_cves
 from src.modules.discord_notifier import send_cve_alert, send_health_status
 from src.utils.database_manager import init_db, is_cve_processed, save_detection
 from src.utils.logger import setup_logger
+from src.modules.report_generator import get_weekly_stats, generate_markdown_report
 
 logger = setup_logger()
 
@@ -114,6 +115,11 @@ if __name__ == "__main__":
                     send_health_status(config["DISCORD_WEBHOOK"], stats)
                     last_health_check = current_date
                     logger.info("💚 Healthcheck diario enviado exitosamente.")
+                    if current_date.weekday() == 6:  # 6 es Domingo
+                        logger.info("📅 Domingo detectado: Generando reporte semanal de impacto...")
+                        stats = get_weekly_stats()
+                        report_path = generate_markdown_report(stats)
+                        logger.info(f"✅ Reporte semanal generado con éxito en: {report_path}")
 
             run_sentinel()
 
