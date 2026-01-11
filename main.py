@@ -9,7 +9,7 @@ from src.modules.report_generator import get_weekly_stats, generate_markdown_rep
 
 logger = setup_logger()
 
-
+# 123
 def check_cpe_match(cve_item, target_cpes):
     configurations = cve_item.get('cve', {}).get('configurations', [])
     for config_item in configurations:
