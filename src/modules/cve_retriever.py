@@ -44,6 +44,8 @@ if __name__ == "__main__":
         for v in vulnerabilidades:
             cve_id = v['cve']['id']
             status = v['cve']['vulnStatus']
+            references = v['cve'].get('references', [])
+            links = [ref.get('url') for ref in references[:3]]
             print(f"📌 {cve_id} | Estado: {status}")
     else:
         print("⚠️ No se pudieron recuperar datos.")
