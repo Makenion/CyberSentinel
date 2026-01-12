@@ -19,9 +19,16 @@ def init_db():
             score REAL,
             severity TEXT,
             is_priority INTEGER,
-            detection_date TIMESTAMP
+            detection_date TIMESTAMP,
+            status TEXT DEFAULT 'PENDING'
         )
     ''')
+    try:
+        cursor.execute('ALTER TABLE detections ADD COLUMN status TEXT DEFAULT "PENDING"')
+        print("✅ Base de datos actualizada: Columna 'status' añadida.")
+    except sqlite3.OperationalError:
+        pass
+
     conn.commit()
     conn.close()
 
