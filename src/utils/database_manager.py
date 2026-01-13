@@ -55,3 +55,19 @@ def save_detection(cve_id, description, score, severity, is_priority):
         return True
     except sqlite3.IntegrityError:
         return False
+
+def update_cve_status(cve_id, new_status):
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        cursor.execute('''
+            UPDATE detections 
+            SET status = ? 
+            WHERE cve_id = ?
+        ''', (new_status, cve_id))
+        conn.commit()
+        conn.close()
+        return True
+    except Exception as e:
+        print(f"❌ Error al actualizar estado: {e}")
+        return False
