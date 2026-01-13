@@ -1,4 +1,5 @@
 import time
+import discord
 from datetime import datetime
 from src.utils.config_loader import get_config
 from src.modules.cve_retriever import fetch_latest_cves
@@ -6,8 +7,15 @@ from src.modules.discord_notifier import send_cve_alert, send_health_status
 from src.utils.database_manager import init_db, is_cve_processed, save_detection
 from src.utils.logger import setup_logger
 from src.modules.report_generator import get_weekly_stats, generate_markdown_report
+from discord.ext import commands
 
 logger = setup_logger()
+intents = discord.Intents.default()
+bot = commands.Bot(command_prefix="!", intents=intents)
+
+@bot.event
+async def on_ready():
+    logger.info(f"🤖 Bot interactivo conectado como {bot.user}")
 
 # 123
 def check_cpe_match(cve_item, target_cpes):
