@@ -1,9 +1,26 @@
 import requests
+import discord
+from discord.ui import View, Button
+from src.utils.database_manager import update_cve_status
 
+class AlertView(View):
+    def __init__(self, cve_id):
+        super().__init__(timeout=None)
+        self.cve_id = cve_id
+
+    @discord.ui.button(label="En Revisión", style=discord.ButtonStyle.blurple, custom_id="review")
+    async def review_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        update_cve_status(self.cve_id, "REVIEWING")
+        await interaction.response.send_message(f"🟠 {self.cve_id} marcado como 'En Revisión'", ephemeral=True)
+
+    @discord.ui.button(label="Ignorar", style=discord.ButtonStyle.gray, custom_id="snooze")
+    async def snooze_button(self, interaction: discord.Interaction, button: discord.ui.Button):
+        update_cve_status(self.cve_id, "SNOOZED")
+        await interaction.response.send_message(f"💤 {self.cve_id} silenciado", ephemeral=True)
 
 def get_severity_color(score, is_priority):
     if is_priority:
-        return 10181046  # Color Púrpura (Destaca sobre el resto)
+        return 10181046  # Color Púrpura (Destaca más)
 
     if score >= 9.0:
         return 15158332  # Rojo (Crítico)
