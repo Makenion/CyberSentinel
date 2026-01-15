@@ -46,6 +46,22 @@ async def pendientes(ctx):
         reporte += f"- `{r[0]}` (Score: {r[1]})\n"
     await ctx.send(reporte)
 
+
+@bot.command(name="stats")
+async def stats(ctx):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT status, COUNT(*) FROM detections GROUP BY status")
+    res = cursor.fetchall()
+    conn.close()
+
+    msg = "📊 **Resumen de Gestión CyberSentinel:**\n"
+    emojis = {"PENDING": "🔴", "REVIEWING": "🟠", "FIXED": "✅", "SNOOZED": "💤"}
+    for status, count in res:
+        msg += f"{emojis.get(status, '❔')} {status}: **{count}**\n"
+
+    await ctx.send(msg)
+
 # 123
 def check_cpe_match(cve_item, target_cpes):
     configurations = cve_item.get('cve', {}).get('configurations', [])
