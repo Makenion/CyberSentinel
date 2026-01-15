@@ -25,6 +25,27 @@ async def on_ready():
     if not background_scan.is_running():
         background_scan.start()
 
+
+@bot.command(name="pendientes")
+async def pendientes(ctx):
+    from src.utils.database_manager import DB_PATH
+    import sqlite3
+
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT cve_id, score FROM detections WHERE status IN ('PENDING', 'REVIEWING') LIMIT 5")
+    rows = cursor.fetchall()
+    conn.close()
+
+    if not rows:
+        await ctx.send("✅ No hay amenazas pendientes de revisión.")
+        return
+
+    reporte = "📝 **Vulnerabilidades Pendientes:**\n"
+    for r in rows:
+        reporte += f"- `{r[0]}` (Score: {r[1]})\n"
+    await ctx.send(reporte)
+
 # 123
 def check_cpe_match(cve_item, target_cpes):
     configurations = cve_item.get('cve', {}).get('configurations', [])
