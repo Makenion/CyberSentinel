@@ -8,14 +8,22 @@ from src.utils.database_manager import init_db, is_cve_processed, save_detection
 from src.utils.logger import setup_logger
 from src.modules.report_generator import get_weekly_stats, generate_markdown_report
 from discord.ext import commands
+from discord.ext import tasks
 
 logger = setup_logger()
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+@tasks.loop(hours=1)
+async def background_scan():
+    logger.info("🛰️ Iniciando escaneo programado...")
+    run_sentinel()
+
 @bot.event
 async def on_ready():
-    logger.info(f"🤖 Bot interactivo conectado como {bot.user}")
+    logger.info(f"🛡️ CyberSentinel conectado como {bot.user}")
+    if not background_scan.is_running():
+        background_scan.start()
 
 # 123
 def check_cpe_match(cve_item, target_cpes):
