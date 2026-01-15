@@ -71,3 +71,11 @@ def update_cve_status(cve_id, new_status):
     except Exception as e:
         print(f"❌ Error al actualizar estado: {e}")
         return False
+
+def get_cve_status(cve_id):
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    cursor.execute("SELECT status FROM detections WHERE cve_id = ?", (cve_id,))
+    result = cursor.fetchone()
+    conn.close()
+    return result[0] if result else None

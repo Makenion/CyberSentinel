@@ -4,7 +4,7 @@ from datetime import datetime
 from src.utils.config_loader import get_config
 from src.modules.cve_retriever import fetch_latest_cves
 from src.modules.discord_notifier import send_cve_alert, send_health_status
-from src.utils.database_manager import init_db, is_cve_processed, save_detection
+from src.utils.database_manager import init_db, is_cve_processed, save_detection, get_cve_status
 from src.utils.logger import setup_logger
 from src.modules.report_generator import get_weekly_stats, generate_markdown_report
 from discord.ext import commands
@@ -80,6 +80,11 @@ def run_sentinel():
 
     for v in vulnerabilidades:
         cve_id = v['cve']['id']
+
+        status_actual = get_cve_status(cve_id)
+        if status_actual in ['SNOOZED', 'FIXED']:
+            logger.info(f"⏭️ Omitiendo {cve_id} por estado: {status_actual}")
+            continue
 
         #  VERIFICACIÓN EN BASE DE DATOS
         if not is_cve_processed(cve_id):
