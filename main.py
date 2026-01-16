@@ -1,6 +1,8 @@
 import time
 import discord
 import sys
+import logging
+import os
 from datetime import datetime
 from src.utils.config_loader import get_config
 from src.modules.cve_retriever import fetch_latest_cves
@@ -10,7 +12,25 @@ from src.utils.logger import setup_logger
 from src.modules.report_generator import get_weekly_stats, generate_markdown_report
 from discord.ext import commands
 from discord.ext import tasks
+from logging.handlers import RotatingFileHandler
 
+
+def setup_logging():
+    if not os.path.exists("logs"):
+        os.makedirs("logs")
+
+    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+    log_file = 'logs/cybersentinel.log'
+
+    handler = RotatingFileHandler(log_file, maxBytes=5 * 1024 * 1024, backupCount=3)
+    handler.setFormatter(formatter)
+
+    logger = logging.getLogger()
+    logger.setLevel(logging.INFO)
+    logger.addHandler(handler)
+    logger.addHandler(logging.StreamHandler())
+
+    return logger
 
 def validate_environment(config):
     requisitos = ["DISCORD_TOKEN", "CPE_LIST", "KEYWORDS", "CHANNEL_ID"]
