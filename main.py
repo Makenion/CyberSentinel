@@ -1,5 +1,6 @@
 import time
 import discord
+import sys
 from datetime import datetime
 from src.utils.config_loader import get_config
 from src.modules.cve_retriever import fetch_latest_cves
@@ -9,6 +10,18 @@ from src.utils.logger import setup_logger
 from src.modules.report_generator import get_weekly_stats, generate_markdown_report
 from discord.ext import commands
 from discord.ext import tasks
+
+
+def validate_environment(config):
+    requisitos = ["DISCORD_TOKEN", "CPE_LIST", "KEYWORDS", "CHANNEL_ID"]
+    faltantes = [r for r in requisitos if not config.get(r)]
+
+    if faltantes:
+        logger.critical(f"❌ Error de configuración. Faltan variables: {', '.join(faltantes)}")
+        logger.info("💡 Revisa tu archivo .env antes de volver a intentar.")
+        sys.exit(1)
+
+    logger.info("✅ Validación de entorno completada con éxito.")
 
 logger = setup_logger()
 intents = discord.Intents.default()
