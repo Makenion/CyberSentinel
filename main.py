@@ -49,8 +49,16 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 
 @tasks.loop(hours=1)
 async def background_scan():
-    logger.info("🛰️ Iniciando escaneo programado...")
-    run_sentinel()
+    try:
+        logger.info("🛰️ Iniciando escaneo programado de NIST...")
+        await run_sentinel()
+    except Exception as e:
+        logger.error(f"⚠️ Error durante el escaneo: {e}")
+        logger.info("⏳ Reintentando en la próxima hora...")
+
+@background_scan.before_loop
+async def before_background_scan():
+    await bot.wait_until_ready()
 
 @bot.event
 async def on_ready():
