@@ -114,6 +114,17 @@ async def stats(ctx):
 
     await ctx.send(msg)
 
+
+@bot.command(name="respaldar")
+async def respaldar(ctx):
+    await ctx.send("⏳ Generando copia de seguridad...")
+    success, detail = create_db_backup()
+
+    if success:
+        await ctx.send(f"✅ Respaldo completado: `{os.path.basename(detail)}`")
+    else:
+        await ctx.send(f"❌ Error al respaldar: {detail}")
+
 # 123
 def check_cpe_match(cve_item, target_cpes):
     configurations = cve_item.get('cve', {}).get('configurations', [])
