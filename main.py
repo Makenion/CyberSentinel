@@ -13,6 +13,7 @@ from src.modules.report_generator import get_weekly_stats, generate_markdown_rep
 from discord.ext import commands
 from discord.ext import tasks
 from logging.handlers import RotatingFileHandler
+from src.utils.backup_manager import create_db_backup
 
 
 def setup_logging():
@@ -47,6 +48,14 @@ logger = setup_logger()
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
 
+@tasks.loop(hours=24)
+async def scheduled_backup():
+    success, detail = create_db_backup()
+    if success:
+        logger.info(f"💾 Respaldo diario creado con éxito: {detail}")
+    else:
+        logger.error(f"⚠️ Fallo al crear respaldo diario: {detail}")
+
 @tasks.loop(hours=1)
 async def background_scan():
     try:
@@ -65,6 +74,8 @@ async def on_ready():
     logger.info(f"🛡️ CyberSentinel conectado como {bot.user}")
     if not background_scan.is_running():
         background_scan.start()
+    if not scheduled_backup.is_running():
+        scheduled_backup.start()
 
 
 @bot.command(name="pendientes")
